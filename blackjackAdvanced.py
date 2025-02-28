@@ -75,9 +75,13 @@ def main():
         print("You can't bet with more than you have. Try again.")
         return 2
     
-    print(f"Your balance is ${money}.")
     print(f"Hello {name}! Have fun playing :-)")
-    print(f"\t--Game begins:--")
+    print(f"Your balance is ${money}.")
+    time.sleep(1)
+    print("--------------------------", flush=True)
+    print(f"    --Game begins:--")
+    print("--------------------------", flush=True)
+    time.sleep(1)
 
     # Initializing deck of cards: 13 cards for each symbol (spades (♠), clubs (♣), hearts (♥) and diamonds (♦))
     cards = [
@@ -90,6 +94,7 @@ def main():
     # Initializing (first) hand for the player
     playerSum = 0
     playerCards = ""
+    numberOfAces = 0
 
     # Initializing (first) hand for the House
     houseSum = 0
@@ -103,6 +108,14 @@ def main():
             hand = assignCard(cards)
             playerSum += hand[0]
             playerCards += hand[1]
+
+            if 'A' in hand[1]:
+                numberOfAces += 1
+
+            # If player got a double ACE cards, reduce card sum in his hand by 10 (from 22 to 12)
+            if playerSum == 22:
+                playerSum -= 10
+                numberOfAces -= 1
 
             if i == 0:
                 print(f"Your card is: {playerCards} (SUM: {playerSum})", flush=True)
@@ -123,16 +136,13 @@ def main():
     # If player got an ACE and 10, J, Q or K, he wins immidiately
     if playerSum == 21:
         print(f"CONGRATULATIONS, {name}! YOU'VE WON!\nCome back again! :-)")
-        money += bet*2
+        money += (bet*3)//2
         # sys.exit(1)
         return 1
 
-    # If player got a double ACE cards, reduce card sum in his hand by 10 (from 22 to 12)
-    if playerSum == 22:
-        playerSum -= 10
-
     # Adding more cards to the players hand, by players command
     while True:
+        print("------Player action------")
         try:
             command = input("Hit, Stand or Double (H/S/D)? ").upper()
         except ValueError:
@@ -147,10 +157,15 @@ def main():
             playerSum += hand[0]
             playerCards += hand[1]
 
+            if 'A' in hand[1]:
+                numberOfAces += 1
+
             # If player got ACE and has sum in hands over 21, use ACE = 1 instead ACE = 11
             if 'A' in playerCards and playerSum > 21:
-                playerSum -= 10
-            
+                if numberOfAces > 0:
+                    playerSum -= 10
+                    numberOfAces -= 1
+
             # Check is sum of cards in players hand over bound (>21)
             if playerSum > 21:
                 print(f"Unfortunately {name}, you've lost.\nYour cards were: {playerCards} (SUM: {playerSum})", flush=True)
@@ -162,7 +177,7 @@ def main():
             time.sleep(1)
         elif checkCommandAction(command) == 'D':
             money -= bet
-            print(f"Your balance is ${money}.")
+            # print(f"Your balance is ${money}.")
             hand = assignCard(cards)
             playerSum += hand[0]
             playerCards += hand[1]
@@ -170,6 +185,12 @@ def main():
             # If player got ACE and has sum in hands over 21, use ACE = 1 instead ACE = 11
             if 'A' in playerCards and playerSum > 21:
                 playerSum -= 10
+
+            # If player got ACE and has sum in hands over 21, use ACE = 1 instead ACE = 11
+            if 'A' in playerCards and playerSum > 21:
+                if numberOfAces > 0:
+                    playerSum -= 10
+                    numberOfAces -= 1
             
             # Check is sum of cards in players hand over bound (>21)
             if playerSum > 21:
@@ -183,7 +204,8 @@ def main():
             break
         else:
             break
-        
+    
+    print("------House action------")
     # House's turn: Adding cards to the house's hand
     while True:
         hand = assignCard(cards)
@@ -225,18 +247,21 @@ print("---------Game: Blackjack---------")
 try:
     name = input("Enter your name: ")
 except ValueError:
-        print("Invalid command. Game will reset.")
-        sys.exit(1)
+    print("Invalid command. Game will reset.")
+    sys.exit(1)
 
 # Calling main function
 while True:
     if main() == 1:
+        print("--------------------------")
         print(f"Your balance is ${money}.")
 
         if money == 0:
             print("You have lost it all! Now go back to your home, disgrace.")
             sys.exit(1)
         
+        print("--------------------------")
+
         try:
             response = input("Do you want to play again (yes|no)? ")
         except ValueError:
@@ -245,9 +270,23 @@ while True:
         
         if response == "yes":
             # Introduction to the game
+            print("---------------------------------")
             print("---------Game: Blackjack---------")
             continue
-        else:
+        elif response == "no":
+            print(f"It was fun playing with you, {name}! Come back soon!")
             sys.exit(1)
+        else:
+            while True:
+                print("Invalid command. Try again: ")
+                response = input("Do you want to play again (yes|no)? ")
+
+                if response == "yes":
+                    break
+                elif response == "no":
+                    sys.exit(1)
+                else:
+                    continue
+            continue
     else:
         continue
