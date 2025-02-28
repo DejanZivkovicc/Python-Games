@@ -53,6 +53,7 @@ def checkCommandAction(command):
 
 # Player's money
 money = 1000
+round = 1
 
 """ Main function """
 def main():
@@ -136,10 +137,11 @@ def main():
     # If player got an ACE and 10, J, Q or K, he wins immidiately
     if playerSum == 21:
         print(f"CONGRATULATIONS, {name}! YOU'VE WON!\nCome back again! :-)")
-        money += (bet*3)//2
+        money += bet + (bet*3)/2
         # sys.exit(1)
         return 1
 
+    indicatorActionDouble = False
     # Adding more cards to the players hand, by players command
     while True:
         print("------Player action------")
@@ -176,6 +178,11 @@ def main():
             print(f"Your cards are: {playerCards} (SUM: {playerSum})", flush=True)
             time.sleep(1)
         elif checkCommandAction(command) == 'D':
+            if bet > money:
+                print("You can't double, because your total is lower than bet.")
+                continue
+            
+            indicatorActionDouble = True
             money -= bet
             # print(f"Your balance is ${money}.")
             hand = assignCard(cards)
@@ -226,22 +233,31 @@ def main():
             elif houseSum == playerSum:
                 print(f"Draw! Everyone gets their bet back. It was great playing with you, {name}!", flush=True)
                 money += bet
+                if indicatorActionDouble == True:
+                    money += bet
                 time.sleep(1)
                 # sys.exit(1)
                 return 1
             else:
                 print(f"CONGRATULATIONS, {name}! YOU'VE WON!\nCome back again! :-)")
                 money += bet*2
+                if indicatorActionDouble == True:
+                    money += bet*2
                 # sys.exit(1)
                 return 1
         else:
             print(f"CONGRATULATIONS, {name}! YOU'VE WON!\nCome back again! :-)")
             money += bet*2
+            if indicatorActionDouble == True:
+                money += bet*2
             # sys.exit(1)
             return 1
 
 # Introduction to the game
 print("---------Game: Blackjack---------")
+print(f"Round: {round}")
+print("---------------------------------")
+round += 1
 
 # Enter your name (just once)
 try:
@@ -259,7 +275,7 @@ while True:
         if money == 0:
             print("You have lost it all! Now go back to your home, disgrace.")
             sys.exit(1)
-        
+
         print("--------------------------")
 
         try:
@@ -272,6 +288,9 @@ while True:
             # Introduction to the game
             print("---------------------------------")
             print("---------Game: Blackjack---------")
+            print(f"Round: {round}")
+            print("---------------------------------")
+            round += 1
             continue
         elif response == "no":
             print(f"It was fun playing with you, {name}! Come back soon!")
